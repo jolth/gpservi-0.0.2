@@ -71,6 +71,10 @@ class ANTDevice(Device):
             # es mejor que se realize por cada cliente con la API de GoogleMap
             self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[1]
 
+            # Creamos una key para el dato position:
+            self['position'] = "(%(lat)s,%(lng)s)" % self
+
+
         except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         finally: dataFile.close()
 
