@@ -72,8 +72,8 @@ class DaemonUDP:
                 try:
                     sys.stdout.write("Exit App... \n")
                     self.server.close()
-                    self.thread.join() # Esperamos hasta que se termine la ejecución de los hilos
-                                       # activos, para terminar la ejecución del programa.
+                    self.thread.join() # Esperamos hasta que se termine la ejecución del ultimo hilo
+                                       # activo, para terminar la ejecución del programa.
                     raise SystemExit("Se terminaron de ejecutar todos los dispositivos activos en el servidor")
                 except AttributeError, NameError: pass
 
@@ -95,7 +95,7 @@ class DaemonUDP:
         rawData = Devices.devices.getTypeClass(data, address) # retorna la data analizada en un diccionario
         
         if not rawData.has_key('id'): # Si la trama no tiene ID 
-            print rawData,"\n"
+            print >> sys.stdout, rawData, '\n'
             return
 
         print rawData # print de Prueba
