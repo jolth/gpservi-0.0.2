@@ -96,11 +96,11 @@ class DaemonUDP:
         
         if not rawData.has_key('id'): # Si la trama no tiene ID 
             print >> sys.stdout, rawData, '\n'
-            return
+            return # Termina de ejecutar el hilo
 
-        print rawData # print de Prueba
+        print rawData # Imprime la data procesada (Print de Prueba)
 
-        # Fichero de Log
+        # Escribe en el Fichero de Log
         lock.acquire(True)
         self.__class__.endfile = logFile(str(load('FILELOG', 'FILE')),
                                          self.__class__.endfile,
