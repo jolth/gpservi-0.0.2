@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-    Autor: Jorge A. Toro
+    Módulo que provee una interfaz de conexión más intuitiva y con
+    la capacidad de resolver errores en tiempo de ejecución.
 
+    Autor: Jorge A. Toro [jolthgs@gmail.com]
 """
-import psycopg2 as pgsql
 import sys
+import traceback
+import psycopg2 as pgsql
+
 
 
 def connection(args=None): 
@@ -54,3 +58,118 @@ def connection(args=None):
     return conn
 
         
+class PgSQL(object):
+    """ 
+        Crea un obejto conexión para la base de datos especificada.
+
+        Recibe los mismos datos que la función connection(args=None). Por lo tanto, si se quiere usar la 
+        conexión a la base de datos por defecto se debe llamar a PgSQL() sin argumentos, asi:
+        >>> conn = pgSQL.PgSQL()
+
+        Usage:
+            >>> import pgSQL
+            >>> db = pgSQL.PgSQL("dbname='test009' user='postgres' host='localhost' password='qwerty'")
+            >>> db
+            <pgSQL.PgSQL object at 0xb740e5ec>
+            >>> db.conn
+            <connection object at 0xb718a72c; dsn: 'dbname='test009' user='postgres' host='localhost' password=xxxxxxxx', closed: 0>
+            >>> dir(db.conn)
+            ['DataError', 'DatabaseError', 'Error', 'IntegrityError', 'InterfaceError', 'InternalError', 'NotSupportedError', \
+            'OperationalError', 'ProgrammingError', 'Warning', '__class__', '__delattr__', '__doc__', '__format__', '__getattribute__', \
+            '__hash__', '__init__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', \
+            '__subclasshook__', 'async', 'binary_types', 'close', 'closed', 'commit', 'cursor', 'dsn', 'encoding', 'fileno', 'get_backend_pid', \
+            'get_parameter_status', 'get_transaction_status', 'isexecuting', 'isolation_level', 'lobject', 'notices', 'notifies', 'poll', \
+            'protocol_version', 'reset', 'rollback', 'server_version', 'set_client_encoding', 'set_isolation_level', 'status', 'string_types']
+            >>>
+            >>> db.cur
+            <cursor object at 0x83916bc; closed: 0>
+            >>> 
+
+    """
+    def __init__(self, args=None):
+        if args is not None: self.conn = connection(args)  
+        else: self.conn = connection()  
+              
+        self.status = self.conn.status # Status
+        self.procpid = self.conn.get_backend_pid() # Get backend process id.
+
+        self.cur = self.conn.cursor() # Return a new cursor.
+
+
+    def exe(self, query, data=None):
+        """
+            query, debe ser una cadena que contenga la Query SQL, así:
+            "SELECT * FROM gps"
+
+            data, debe ser una tupla o diccionario que cotenga los datos a 
+            pasar a la Query, así:
+            "INSERT INTO test (num, data) VALUES (%s, %s)", (42, 'bar')
+
+            usage:
+            >>> import pgSQL
+
+            >>> db = pgSQL.PgSQL("dbname='test009' user='postgres' host='localhost' password='qwerty'")
+            >>> db.exe("SELECT * FROM gps")
+            >>> db.cur.fetchall()
+            [(11, 'GPS0003', 2, False, datetime.datetime(2012, 6, 10, 8, 11, 31, 945952, \
+            tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=1140, name=None))), (14, 'ANT051', \
+            1, False, datetime.datetime(2012, 7, 13, 9, 5, 42, 747214, tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=1140, name=None)))]
+            >>> 
+
+            >>> db = pgSQL.PgSQL("dbname='test009' user='postgres' host='localhost' password='qwerty'")
+            >>> db.exe("SELECT * FROM gps WHERE id=14")
+            >>> db.cur.fetchone()
+            (14, 'ANT051', 1, False, datetime.datetime(2012, 7, 13, 9, 5, 42, 747214, tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=1140, name=None)))
+            >>> 
+            >>> db.cur.fetchall()
+            [(14, 'ANT051', 1, False, datetime.datetime(2012, 7, 13, 9, 5, 42, 747214, tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=1140, name=None)))]
+            >>> 
+            
+            >>> db = pgSQL.PgSQL("dbname='test009' user='postgres' host='localhost' password='qwerty'")
+            >>> db.exe("INSERT INTO gps (name, type) VALUES (%s, %s)", ('GPS0004', 2))
+            'INSERT 0 1'
+            >>>
+        """
+        if data is not None:
+            try:
+                self.cur.execute(query, data)
+                return self.cur.statusmessage
+            except:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                print >> sys.stderr, traceback.format_exc(exc_type)
+                #return self.conn.status
+                return self.conn.get_transaction_status()
+            finally: 
+                print >> sys.stderr, "Actualizando y Cerranda la conexión"
+                # Realizamos los cambios en la DB
+                self.conn.commit()
+                # Cerramos la comunicación
+                self.cur.close()
+                self.conn.close()
+                
+        else:
+            try:
+                self.cur.execute(query) # Execute the Query
+                return self.cur.fetchall() # Retornamo una lista con los 
+                                           # resultados de la consulta
+            except:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                #print >> sys.stderr, traceback.format_exc(exc_type)
+                print >> sys.stderr, "".join(traceback.format_exception_only(exc_type, exc_value))
+                #return self.conn.status
+                return self.conn.get_transaction_status()
+            finally:
+                print >> sys.stderr, "Actualizando y Cerranda la conexión"
+                # Realizamos los cambios en la DB
+                self.conn.commit()
+                # Cerramos la comunicación
+                self.cur.close()
+                self.conn.close()
+
+
+                
+
+    def exemany(self): pass
+
+
+

@@ -49,11 +49,11 @@ class DaemonUDP:
             try:
                 self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Creamos el Socket Server 
                 self.server.bind((self.host, self.port))
-                print ("Server run %s:%s" % (self.host, self.port))
+                print >> sys.stdout, ("Server run %s:%s" % (self.host, self.port))
             except socket.error, (value, message):
                 if self.server:
                     self.server.close()
-                print "Could not open socket:", message 
+                print >> sys.stderr, "Could not open socket:", message
                 sys.exit(1)
 
         
