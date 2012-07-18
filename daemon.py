@@ -100,7 +100,12 @@ class DaemonUDP:
 
         print rawData # Imprime la data procesada (Print de Prueba)
 
-        # Escribe en el Fichero de Log
+        ### Escribe el la Tabla de Log
+        import Log.logDB as LogDB
+        LogDB.insertLog(rawData)
+        # End Tabla de Log
+
+        #### Escribe en el Fichero de Log
         lock.acquire(True)
         self.__class__.endfile = logFile(str(load('FILELOG', 'FILE')),
                                          self.__class__.endfile,
@@ -108,7 +113,6 @@ class DaemonUDP:
                                         )
         lock.release()
         # End Fichero de Log
-
 
 
 

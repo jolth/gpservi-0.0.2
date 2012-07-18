@@ -49,9 +49,9 @@ def connection(args=None):
     try:
         conn = pgsql.connect(args)
     except pgsql.OperationalError, e:
-        print >> sys.stderr.write, "\nNo se pudo poner en marcha la base de datos.\n"
-        print >> sys.stderr.write, e
-        print >> sys.stdout.write, 'Error: Revisar el archivo de error.log'
+        print >> sys.stderr, "\nNo se pudo poner en marcha la base de datos.\n"
+        print >> sys.stderr, e
+        print >> sys.stdout, 'Error: Revisar el archivo de error.log'
         sys.exit(1)
 
     # Retornamos la conexión
@@ -94,6 +94,8 @@ class PgSQL(object):
         self.procpid = self.conn.get_backend_pid() # Get backend process id.
 
         self.cur = self.conn.cursor() # Return a new cursor.
+
+        print "procpid:", self.procpid # process id (Print de Prueba)
 
 
     def exe(self, query, data=None):
