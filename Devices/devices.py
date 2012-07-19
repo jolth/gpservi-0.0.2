@@ -31,7 +31,8 @@ class Device(UserDict):
     def __init__(self, deviceData=None, address=None):
         UserDict.__init__(self)
         self["data"] = deviceData
-        self["address"] = address
+        #self["address"] = address
+        self["address"] = "%s,%s" % address
         #self["geocoding"] = None
         # Fecha y hora (del sistema)
         self["datetime"] = datetime.datetime.now()
