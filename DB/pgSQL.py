@@ -131,16 +131,28 @@ class PgSQL(object):
             >>> db.exe("INSERT INTO gps (name, type) VALUES (%s, %s)", ('GPS0004', 2))
             'INSERT 0 1'
             >>>
+
+            # Si no, existen datos en una consoulta se puede manajar así:
+            >>> db = pgSQL.PgSQL("dbname='test009' user='postgres' host='localhost' password='qwerty'")
+            >>> r = db.exe("SELECT * FROM gps WHERE id=10")
+            Actualizando y Cerranda la conexión
+            >>> if r is not None: print "Record: ", r
+            ... else: "No existen datos"
+            ... 
+            'No existen datos'
+            >>>
         """
+        record = None
+
         if data is not None:
             try:
                 self.cur.execute(query, data)
-                return self.cur.statusmessage
+                return self.cur.statusmessage # Deberia retornar 1, si el insert se realizo 
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 print >> sys.stderr, traceback.format_exc(exc_type)
                 #return self.conn.status
-                return self.conn.get_transaction_status()
+                return self.conn.get_transaction_status() # Deberia retornar 0, si el insert no se realizo 
             finally: 
                 print >> sys.stderr, "Actualizando y Cerranda la conexión"
                 # Realizamos los cambios en la DB
@@ -152,14 +164,15 @@ class PgSQL(object):
         else:
             try:
                 self.cur.execute(query) # Execute the Query
-                return self.cur.fetchall() # Retornamo una lista con los 
-                                           # resultados de la consulta
+                record = self.cur.fetchall() or record 
+                return record  # Retornamo una lista con los resultados 
+                               # de la consulta o None si no obtine nada
             except:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 #print >> sys.stderr, traceback.format_exc(exc_type)
                 print >> sys.stderr, "".join(traceback.format_exception_only(exc_type, exc_value))
                 #return self.conn.status
-                return self.conn.get_transaction_status()
+                return self.conn.get_transaction_status() # Deberia retornar -1, si sucede un Error. 
             finally:
                 print >> sys.stderr, "Actualizando y Cerranda la conexión"
                 # Realizamos los cambios en la DB
