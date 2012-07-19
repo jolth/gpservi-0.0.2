@@ -68,6 +68,8 @@ class ANTDevice(Device):
             for tag, (position, bit, seek, parseFunc, convertFunc) in self.tagDataANT.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataFile, position, bit, seek)) or parseFunc(dataFile, position, bit, seek)
 
+            # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
+            self['altura'] = None
             # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
 

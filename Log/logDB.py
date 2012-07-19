@@ -32,11 +32,11 @@ def insertLog(data=None):
         >>> 
 
     """
-    query = """INSERT INTO log_gps (name, address, evento, fecha, posicion, ubicacion, grados, satelites, estado_data, trama) 
+    query = """INSERT INTO log_gps (name, address, evento, fecha, posicion, ubicacion, grados, altura, satelites, estado_data, trama) 
                VALUES (%(id)s, %(address)s, 
                        %(codEvent)s, %(datetime)s, 
                        %(position)s, %(geocoding)s, 
-                       %(course)s, %(gpsSource)s, 
+                       %(course)s, %(altura)s, %(gpsSource)s, 
                        %(ageData)s, %(data)s)
             """
     db = PgSQL()
