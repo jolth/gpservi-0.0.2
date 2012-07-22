@@ -100,6 +100,13 @@ class DaemonUDP:
 
         print rawData # Imprime la data procesada (Print de Prueba)
 
+        ### Eventos
+        import Event.captureEvent
+        event = Event.captureEvent.parseEvent(rawData) # Si se gestiona retorna el nombre del 
+                                                       # evento gestionado. Si no retorna None.
+        print "Evento Gestionado:", event
+        # End Event
+
         ### Escribe el la Tabla de Log
         import Log.logDB as LogDB
         LogDB.insertLog(rawData)
